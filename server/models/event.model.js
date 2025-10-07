@@ -17,9 +17,14 @@ const eventSchema = new mongoose.Schema(
     location: { 
         type: String 
     },
-    image: { 
-        type: String 
+    images: { 
+        type: [String] ,
+        default: [],
     },
+    videos: {
+        type: [String],
+        default: [],
+    }
   },
   { timestamps: true }
 );

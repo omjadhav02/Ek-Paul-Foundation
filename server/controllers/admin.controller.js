@@ -1,6 +1,7 @@
 import Admin from "../models/admin.model.js";
 import jwt from "jsonwebtoken";
 import { sendEmail } from "../utils/sendEmail.js";
+import { adminVerificationTemplate } from "../utils/email-templates/adminVerification.js";
 
 const generateToken = (id) =>{
     return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: "7d" });
@@ -9,6 +10,14 @@ const generateToken = (id) =>{
 export const signup = async (req, res)=>{
     try {
         const { username, email, password } = req.body;
+
+        if(password.length < 6){
+            return res.status(400).json({message: "Password must be at least 6 characters long!"})
+        }
+
+        if(!username.trim() || !email.trim() || !password.trim()){
+            return res.status(401).json({message: "Fields are missing!"})
+        }
 
         const exists = await Admin.findOne({email});
 
@@ -27,11 +36,14 @@ export const signup = async (req, res)=>{
             otp,
             otpExpiry,
         });
+        
+        const name = username.split(" ")[0];
+        const html = adminVerificationTemplate(name, otp);
 
-        await sendEmail(email, "Email Verifiation - Ek Paul Foundation ",`Your verification code is : ${otp}`)
+        await sendEmail(email, "Email Verification - Ek Paul Foundation ",html)
 
         res.status(201).json({
-            message: "Signup Successful!",
+            message: "Please verify email!, Check your inbox for the OTP",
             adminId: admin._id, 
         });
 
@@ -44,29 +56,36 @@ export const signup = async (req, res)=>{
 
 export const verifyEmail = async (req,res)=>{
     try {
-        const { otp } = req.body;
+    const { email, otp } = req.body;
+    const admin = await Admin.findOne({ email });
 
-        const admin  = await Admin.findOne({otp});
-        if(!admin){
-            return res.status(404).josn({message: "Admin no found!"})
-        }
-
-        if(admin.isVerified){
-            return res.status(400).json({message: "Already verified!"})
-        }
-
-        admin.isVerified = true;
-        admin.otp = undefined;
-        admin.otpExpiry = undefined;
-
-        await admin.save();
-
-        console.log("Email Verification Successful!");
-        res.status(200).json({message: "Email Verification Successful!"})
-    } catch (error) {
-        console.error("Error in Verify Controller", error);
-        res.status(500).json({ message: error.message });
+    if (!admin) {
+      return res.status(404).json({ success: false, message: "Admin not found" });
     }
+
+    // Check OTP expiry
+    if (Date.now() > admin.otpExpiry) {
+      await admin.deleteOne(); // delete expired admin
+      return res.status(400).json({ success: false, message: "OTP expired. Please register again." });
+    }
+
+    // Check OTP match
+    if (admin.otp !== otp) {
+      return res.status(400).json({ success: false, message: "Invalid OTP." });
+    }
+
+    // Mark verified and clear OTP info
+    admin.isVerified = true;
+    admin.otp = null;
+    admin.otpExpiry = null;
+    await admin.save();
+
+    res.status(200).json({ success: true, message: "Email verified successfully!" });
+
+  } catch (error) {
+    console.error("Error verifying Admin OTP:", error);
+    res.status(500).json({ success: false, message: error.message });
+  }
 }
 
 export const login = async (req, res)=>{

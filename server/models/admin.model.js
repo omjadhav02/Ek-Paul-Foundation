@@ -28,6 +28,8 @@ const adminSchema = new mongoose.Schema({
     }
 }, { timestamps: true });
 
+adminSchema.index({ otpExpiry: 1 }, { expireAfterSeconds: 0 });
+
 adminSchema.pre("save", async function(next){
     if(!this.isModified("password")) return next();
     const salt = await bcrypt.genSalt(10);

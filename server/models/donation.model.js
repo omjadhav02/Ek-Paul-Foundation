@@ -1,35 +1,37 @@
 import mongoose from "mongoose";
 
 const donationSchema = new mongoose.Schema({
-    name:{
-        type: String,
-        required: true,
-    },
-    email: {
-        type: String, 
-        required: true,
-    },
-    amount:{
-        type: String,
-        required: true,
-    },
-    message: {
-        type: String,
-    },
-    paymentStatus: {
-        type: String,
-        enum: ["success","failed","pending"],
-        default: "pending",
-    },
-    transactionId: {
-        type: String,
-    },
-    projectId:{
-        type: mongoose.Schema.Types.ObjectId, 
-        ref: "Project"
-    }
-},{timestamps: true})
+  name: { 
+    type: String, 
+    required: true 
+},
+  email: { 
+    type: String, 
+    required: true 
+},
+  amount: { 
+    type: Number, 
+    required: true 
+}, // changed to Number
+  message: { 
+    type: String 
+},
+  paymentStatus: { 
+    type: String, 
+    enum: ["success","failed","pending"], 
+    default: "pending" 
+},
+  transactionId: { 
+    type: String 
+},
+  orderId: { 
+    type: String 
+}, // store Razorpay order_id
+  projectId: { 
+    type: mongoose.Schema.Types.ObjectId, 
+    ref: "Project" 
+}
+}, { timestamps: true });
 
-const Donation = mongoose.model("Donation",donationSchema);
-
+const Donation = mongoose.model("Donation", donationSchema);
 export default Donation;

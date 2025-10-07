@@ -1,6 +1,6 @@
 import nodemailer from "nodemailer";
 
-export const sendEmail = async (to, subject, text)=>{
+export const sendEmail = async (to, subject, htmlContent)=>{
     try {
         const transporter = nodemailer.createTransport({
             service: "gmail",
@@ -14,8 +14,9 @@ export const sendEmail = async (to, subject, text)=>{
             from: `"Ek Paul Foundation" <${process.env.EMAIL_USER}>`,
             to,
             subject,
-            text,
+            html: htmlContent,
         })
+        console.log("Email sent successfully to", to);
     } catch (error) {
         console.log("Error in sendEmail utils : ",error);
     }
