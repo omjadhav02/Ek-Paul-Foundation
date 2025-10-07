@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Test Donation</title>
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+</head>
+<body>
+  <h1>Donate to Ek Paul Foundation</h1>
+  
+  <form id="donationForm">
+    <input type="text" id="name" placeholder="Your Name" required /><br/>
+    <input type="email" id="email" placeholder="Email" required /><br/>
+    <input type="number" id="amount" placeholder="Amount (₹)" required /><br/>
+    <textarea id="message" placeholder="Message"></textarea><br/>
+    <button type="submit">Donate</button>
+  </form>
+
+  <script>
+    const form = document.getElementById("donationForm");
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const name = document.getElementById("name").value;
+      const email = document.getElementById("email").value;
+      const amount = document.getElementById("amount").value;
+      const message = document.getElementById("message").value;
+
+      // 1️⃣ Create order via backend
+      const orderRes = await fetch("http://localhost:2000/api/donations/create-order", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, amount, message })
+      });
+      const orderData = await orderRes.json();
+
+      // 2️⃣ Open Razorpay Checkout
+      const options = {
+        key: "rzp_test_RQ5t2QrV6VR7I9", // test key
+        amount: orderData.amount,
+        currency: orderData.currency,
+        name: "Ek Paul Foundation",
+        description: "Donation",
+        order_id: orderData.orderId,
+        handler: async function (response) {
+          // 3️⃣ Verify payment on backend
+          const verifyRes = await fetch("http://localhost:2000/api/donations/verify-payment", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              order_id: response.razorpay_order_id,
+              payment_id: response.razorpay_payment_id,
+              signature: response.razorpay_signature
+            })
+          });
+          
+          const verifyData = await verifyRes.json();
+          alert(verifyData.message);
+            console.log("Order ID:", response.razorpay_order_id);
+            console.log("Payment ID:", response.razorpay_payment_id);
+            console.log("Signature:", response.razorpay_signature);
+        },
+        theme: { color: "#3399cc" }
+      };
+      const rzp = new Razorpay(options);
+      rzp.open();
+    });
+  </script>
+</body>
+</html>
