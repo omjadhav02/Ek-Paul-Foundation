@@ -1,9 +1,9 @@
 import Visit from "../models/visit.model.js";
+import cloudinary from "../config/cloudinary.js";
 
-// Add a new visit
+// ➕ Add Visit
 export const addVisit = async (req, res) => {
   try {
-    // Destructure fields from request body
     const {
       visitType,
       location,
@@ -13,51 +13,50 @@ export const addVisit = async (req, res) => {
       packagingCost,
       transportationCost,
       otherExpenses,
-      notes
+      notes,
     } = req.body;
 
-    // Handle uploaded images and videos (from multer + cloudinary)
-    const images = req.files?.images?.map(file => file.path) || [];
-    const videos = req.files?.videos?.map(file => file.path) || [];
+    const images = req.files?.images?.map(file => ({
+      url: file.path,
+      public_id: file.filename || file.public_id || file.path.split('/').pop().split('.')[0],
+    })) || [];
 
-    // Create the new Visit document
+    const videos = req.files?.videos?.map(file => ({
+      url: file.path,
+      public_id: file.filename || file.public_id || file.path.split('/').pop().split('.')[0],
+    })) || [];
+
     const newVisit = new Visit({
       visitType,
       location,
       visitDate,
       volunteer,
-      itemsProvided: typeof itemsProvided === 'string' ? JSON.parse(itemsProvided) : itemsProvided,
+      itemsProvided: typeof itemsProvided === "string" ? JSON.parse(itemsProvided) : itemsProvided,
       packagingCost: packagingCost || 0,
       transportationCost: transportationCost || 0,
       otherExpenses: otherExpenses || 0,
       notes,
       images,
-      videos: videos
+      videos,
     });
 
-    // Save to DB (pre-save hook will calculate totals automatically)
     await newVisit.save();
 
     res.status(201).json({
       success: true,
-      message: 'Visit added successfully!',
-      data: newVisit
+      message: "Visit added successfully!",
+      data: newVisit,
     });
   } catch (error) {
-    console.error('Add Visit Error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Server error',
-      error: error.message
-    });
+    console.error("Add Visit Error:", error);
+    res.status(500).json({ success: false, message: "Server error", error: error.message });
   }
 };
 
-
-// ✅ Get all visits (with optional filters)
+// 📜 Get All Visits
 export const getAllVisits = async (req, res) => {
   try {
-    const { month, year, type } = req.query; // optional filters
+    const { month, year, type } = req.query;
     const filter = {};
 
     if (month && year) {
@@ -80,7 +79,7 @@ export const getAllVisits = async (req, res) => {
   }
 };
 
-// ✅ Get single visit by ID
+// 🔍 Get Visit by ID
 export const getVisitById = async (req, res) => {
   try {
     const visit = await Visit.findById(req.params.id);
@@ -92,26 +91,50 @@ export const getVisitById = async (req, res) => {
   }
 };
 
-// ✅ Update a visit
+// ✏️ Update Visit
 export const updateVisit = async (req, res) => {
   try {
     const visit = await Visit.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
     if (!visit) return res.status(404).json({ success: false, message: "Visit not found" });
-    res.status(200).json({ success: true, message: "Visit updated", visit });
+    res.status(200).json({ success: true, message: "Visit updated successfully", visit });
   } catch (error) {
     console.error("Update Visit Error:", error);
     res.status(500).json({ success: false, message: "Server error", error: error.message });
   }
 };
 
-// ✅ Delete a visit
+// ✅ Delete Visit (with proper Cloudinary cleanup)
 export const deleteVisit = async (req, res) => {
   try {
-    const visit = await Visit.findByIdAndDelete(req.params.id);
-    if (!visit) return res.status(404).json({ success: false, message: "Visit not found" });
-    res.status(200).json({ success: true, message: "Visit deleted successfully" });
+    const visit = await Visit.findById(req.params.id);
+    if (!visit)
+      return res.status(404).json({ success: false, message: "Visit not found" });
+
+    // Helper to delete Cloudinary files
+    const deleteFromCloudinary = async (mediaArray, type) => {
+      if (!mediaArray?.length) return;
+      for (const media of mediaArray) {
+        if (media.public_id) {
+          await cloudinary.uploader.destroy(media.public_id, {
+            resource_type: type,
+          });
+        }
+      }
+    };
+
+    // Delete both image & video files from Cloudinary
+    await deleteFromCloudinary(visit.images, "image");
+    await deleteFromCloudinary(visit.videos, "video");
+
+    await visit.deleteOne();
+
+    res.status(200).json({
+      success: true,
+      message: "Visit deleted successfully!",
+    });
   } catch (error) {
-    console.error("Delete Visit Error:", error);
-    res.status(500).json({ success: false, message: "Server error" });
+    console.error("Error deleting visit:", error);
+    res.status(500).json({ success: false, message: error.message });
   }
 };
+

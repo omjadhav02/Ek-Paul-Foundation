@@ -1,4 +1,3 @@
-// models/Event.js
 import mongoose from "mongoose";
 
 const eventSchema = new mongoose.Schema(
@@ -11,24 +10,34 @@ const eventSchema = new mongoose.Schema(
         type: String 
     },
     date: { 
-        type: Date, 
-        // required: true 
+        type: Date 
     },
     location: { 
         type: String 
     },
-    images: { 
-        type: [String] ,
+    images: {
+        type: [
+            {
+                url: { type: String, required: true },
+                public_id: { type: String, required: true },
+            }
+        ],
         default: [],
     },
     videos: {
-        type: [String],
+        type: [
+            {
+            url: { type: String, required: true },
+            public_id: { type: String, required: true },
+            }
+        ],
         default: [],
-    }
+    },
+
   },
   { timestamps: true }
 );
 
-const Event =  mongoose.model("Event", eventSchema);
+const Event = mongoose.model("Event", eventSchema);
 
 export default Event;
