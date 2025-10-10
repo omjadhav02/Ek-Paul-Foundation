@@ -1,6 +1,10 @@
 import razorpay from "../config/razorpay.js";
 import Donation from "../models/donation.model.js";
 import crypto from "crypto";
+import { donationSuccessTemplate } from "../utils/email-templates/donationSuccess.js";
+import { sendEmail2 } from "../utils/sendEmail2.js";
+import { generateDonationReceipt } from "../utils/generateDonationReceipt.js";
+import fs from "fs";
 
 export const createOrder = async (req, res) =>{
     try {
@@ -43,6 +47,7 @@ export const createOrder = async (req, res) =>{
     }
 }
 
+
 export const verifyPayment = async (req, res) => {
   try {
     const { order_id, payment_id, signature } = req.body;
@@ -52,30 +57,66 @@ export const verifyPayment = async (req, res) => {
       .update(order_id + "|" + payment_id)
       .digest("hex");
 
-    if (generated_signature === signature) {
-      const donation = await Donation.findOneAndUpdate(
-        { orderId: order_id },
-        { transactionId: payment_id, paymentStatus: "success" },
-        { new: true }
-      );
-
-      return res.status(200).json({
-        message: "Payment verified successfully",
-        donation,
-      });
-    } else {
+    if (generated_signature !== signature) {
       await Donation.findOneAndUpdate(
         { orderId: order_id },
         { paymentStatus: "failed" }
       );
-
       return res.status(400).json({ message: "Invalid Payment Signature" });
     }
+
+    const donation = await Donation.findOneAndUpdate(
+      { orderId: order_id },
+      { transactionId: payment_id, paymentStatus: "success" },
+      { new: true }
+    );
+
+    if (!donation) {
+      return res.status(404).json({ message: "Donation not found" });
+    }
+
+    // Generate PDF receipt
+    const pdfBuffer = await generateDonationReceipt(donation);
+    const pdfPath = `./tmp/DonationReceipt_${donation.transactionId}.pdf`;
+
+    // Ensure tmp folder exists
+    if (!fs.existsSync("./tmp")) fs.mkdirSync("./tmp");
+
+    fs.writeFileSync(pdfPath, pdfBuffer);
+
+    // Create the HTML email content
+    const html = donationSuccessTemplate(
+      donation.name,
+      donation.amount,
+      new Date(donation.createdAt).toLocaleString(),
+      donation.transactionId
+    );
+
+    // Send email with PDF attachment
+    await sendEmail2(
+      donation.email,
+      "Your Donation Receipt - Ek Paul Foundation",
+      html,
+      pdfPath
+    );
+
+    // Optional: delete PDF file after 5 mins
+    setTimeout(() => {
+      if (fs.existsSync(pdfPath)) fs.unlinkSync(pdfPath);
+    }, 1000 * 60 * 5);
+
+    return res.status(200).json({
+      message: "Payment verified & receipt emailed successfully",
+      donation,
+    });
   } catch (error) {
-    console.error("Error in verifyPayment Controller:", error);
+    console.error("Error in verifyPayment:", error);
     res.status(500).json({ message: error.message });
   }
 };
+
+
+
 
 
 export const getAllDonations = async (req, res) => {

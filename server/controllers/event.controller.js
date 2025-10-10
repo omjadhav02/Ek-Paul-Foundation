@@ -46,7 +46,7 @@ export const getEvents = async (req, res) => {
     if (!events.length)
       return res.status(404).json({ success: false, message: "No events found" });
 
-    res.status(200).json({ success: true, data: events });
+    res.status(200).json(events);
   } catch (error) {
     console.error("Error fetching events:", error);
     res.status(500).json({ success: false, message: error.message });
@@ -60,7 +60,7 @@ export const getEventById = async (req, res) => {
     if (!event)
       return res.status(404).json({ success: false, message: "Event not found" });
 
-    res.status(200).json({ success: true, data: event });
+    res.status(200).json(event);
   } catch (error) {
     console.error("Error fetching event:", error);
     res.status(500).json({ success: false, message: error.message });
