@@ -31,7 +31,7 @@ export default function Donation() {
 
     try {
       const { data } = await axios.post(
-        "http://localhost:2000/api/donations/create-order",
+        `${import.meta.env.VITE_API_URL}/api/donations/create-order`,
         form
       );
 
@@ -52,7 +52,7 @@ export default function Donation() {
           };
           try {
             await axios.post(
-              "http://localhost:2000/api/donations/verify-payment",
+              `${import.meta.env.VITE_API_URL}/api/donations/verify-payment`,
               verifyData
             );
             setNotification({ type: "success", message: "🎉 Thank you! Your donation was successful." });

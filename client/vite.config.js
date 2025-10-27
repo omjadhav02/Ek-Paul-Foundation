@@ -7,5 +7,9 @@ export default defineConfig({
   plugins: [
     react(),
     tailwindcss(),
+    
   ],
+  build: {
+    outDir: "dist", // Render needs the build output here
+  },
 })

@@ -18,7 +18,7 @@ export default function ContactUs() {
     e.preventDefault();
     setStatus("Sending...");
     try {
-      await axios.post("http://localhost:2000/api/contact", formData);
+      await axios.post(`${import.meta.env.VITE_API_URL}/api/contact}`, formData);
       setStatus("Message sent successfully ✅");
       setFormData({ name: "", email: "", message: "" });
     } catch (error) {
