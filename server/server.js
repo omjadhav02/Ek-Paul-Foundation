@@ -9,13 +9,17 @@ import cors from 'cors';
 import webhookRoutes from "./routes/webhook.route.js";
 import visitRoutes from "./routes/visit.route.js";
 import volunteerRoutes from "./routes/volunteer.route.js"
+import contactRoutes from "./routes/contact.route.js"
 
 dotenv.config();
 
 const app = express();
 app.use(express.json());
 app.use(cookieParser());
-app.use(cors({ origin: "*"}));
+app.use(cors({ 
+    origin: "http://localhost:5173",
+    credentials: true,
+}));
 
 const PORT = process.env.PORT || 2000;
 
@@ -27,6 +31,7 @@ app.use("/api/donations",donationRoutes);
 app.use("/api/webhooks", webhookRoutes);
 app.use("/api/visits", visitRoutes);
 app.use("/api/volunteers",volunteerRoutes)
+app.use("/api/contact", contactRoutes);
 
 app.listen(PORT, ()=>{
     console.log("Server Running on PORT:",PORT);

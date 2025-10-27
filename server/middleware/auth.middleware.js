@@ -1,20 +1,25 @@
-import jwt from "jsonwebtoken";
-
-import Admin from "../models/admin.model.js";
+import admin from "../config/firebaseAdmin.js";
 
 export const protectAdmin = async (req, res, next) => {
   try {
-    const token = req.cookies.token;
+    const authHeader = req.headers.authorization;
+    console.log("Authorization Header:", authHeader)
 
-    if (!token) return res.status(401).json({ message: "Not authorized" });
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return res.status(401).json({ message: "No token provided" });
+    }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const token = authHeader.split(" ")[1];
 
-    req.admin = await Admin.findById(decoded.id).select("-password");
+    // ✅ Verify token using Firebase Admin SDK
+    const decodedToken = await admin.auth().verifyIdToken(token);
+
+    // Attach decoded Firebase user data to req
+    req.admin = decodedToken;
 
     next();
   } catch (error) {
-    res.status(401).json({ message: "Invalid token" });
+    console.error("Firebase Auth Error:", error);
+    res.status(401).json({ message: "Invalid or expired token" });
   }
 };
-

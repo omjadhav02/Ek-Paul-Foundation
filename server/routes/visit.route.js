@@ -25,7 +25,9 @@ router.post(
   ]),
   addVisit
 );
-router.put("/:id", protectAdmin, updateVisit);
+router.put("/:id", protectAdmin, uploadVisits.fields([
+  { name: "images", maxCount: 10 },
+  { name: "videos", maxCount: 5 }]),updateVisit);
 router.delete("/:id", protectAdmin, deleteVisit);
 
 export default router;

@@ -25,7 +25,10 @@ router.post(
   ]),
   createEvent
 );
-router.put("/:id", protectAdmin, updateEvent);
+router.put("/:id", protectAdmin, uploadEvents.fields([
+    { name: "images", maxCount: 10 },
+    { name: "videos", maxCount: 3 },
+  ]), updateEvent);
 router.delete("/:id", protectAdmin, deleteEvent);
 
 export default router;

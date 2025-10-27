@@ -17,13 +17,13 @@ export const addVisit = async (req, res) => {
     } = req.body;
 
     const images = req.files?.images?.map(file => ({
-      url: file.path,
-      public_id: file.filename || file.public_id || file.path.split('/').pop().split('.')[0],
+      url: file.path || file.secure_url || file.url,
+      public_id: file.filename || file.public_id,
     })) || [];
 
     const videos = req.files?.videos?.map(file => ({
-      url: file.path,
-      public_id: file.filename || file.public_id || file.path.split('/').pop().split('.')[0],
+      url: file.path || file.secure_url || file.url,
+      public_id: file.filename || file.public_id,
     })) || [];
 
     const newVisit = new Visit({
@@ -32,9 +32,9 @@ export const addVisit = async (req, res) => {
       visitDate,
       volunteer,
       itemsProvided: typeof itemsProvided === "string" ? JSON.parse(itemsProvided) : itemsProvided,
-      packagingCost: packagingCost || 0,
-      transportationCost: transportationCost || 0,
-      otherExpenses: otherExpenses || 0,
+      packagingCost: Number(packagingCost) || 0,
+      transportationCost: Number(transportationCost) || 0,
+      otherExpenses: Number(otherExpenses) || 0,
       notes,
       images,
       videos,
@@ -52,6 +52,7 @@ export const addVisit = async (req, res) => {
     res.status(500).json({ success: false, message: "Server error", error: error.message });
   }
 };
+
 
 // 📜 Get All Visits
 export const getAllVisits = async (req, res) => {
@@ -72,7 +73,7 @@ export const getAllVisits = async (req, res) => {
     if (type) filter.visitType = type;
 
     const visits = await Visit.find(filter).sort({ visitDate: -1 });
-    res.status(200).json({ success: true, visits });
+    res.status(200).json(visits);
   } catch (error) {
     console.error("Get Visits Error:", error);
     res.status(500).json({ success: false, message: "Server error" });

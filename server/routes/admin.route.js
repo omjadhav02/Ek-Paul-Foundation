@@ -1,12 +1,18 @@
 import express from "express";
-import { login, logout, signup, verifyEmail } from "../controllers/admin.controller.js";
-
+import {
+  signup,
+  login,
+  logout,
+  protectAdmin,
+} from "../controllers/admin.controller.js";
 
 const router = express.Router();
 
-router.post("/signup",signup);
-router.post("/verify-email",verifyEmail);
-router.post("/login",login);
-router.post("/logout",logout);
+// Public routes
+router.post("/signup", signup); // Email/Password signup
+router.post("/login", login);   // Login with ID token (Email/Password or Google)
+
+// Protected route
+router.post("/logout", protectAdmin, logout);
 
 export default router;

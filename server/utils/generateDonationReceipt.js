@@ -33,7 +33,7 @@ export const generateDonationReceipt = (donation) => {
         .fillColor("black")
         .text("Registered Non-Profit Organization", { align: "center" })
         .moveDown(0.2)
-        .text("Email: ekpaulfoundation@gmail.com | Phone: +91 98765 43210", {
+        .text("Email: contact@ekpaulfoundation.org ", {
           align: "center",
         })
         .moveDown(1);

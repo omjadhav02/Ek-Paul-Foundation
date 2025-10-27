@@ -8,7 +8,7 @@ export default function Footer() {
         <div>
           <h3 className="text-2xl font-bold mb-4">Ek Paul Foundation</h3>
           <p className="text-gray-200 text-sm md:text-base leading-relaxed">
-            Supporting tribal schools near Nashik by providing education,
+            Supporting tribal schools in Palghar & Nashik by providing education,
             nutrition, and community growth initiatives.
           </p>
         </div>
@@ -19,7 +19,6 @@ export default function Footer() {
           <ul className="space-y-2 text-gray-200 text-sm md:text-base">
             <li><a href="/" className="hover:text-yellow-400 transition">Home</a></li>
             <li><a href="/about" className="hover:text-yellow-400 transition">About</a></li>
-            <li><a href="/events" className="hover:text-yellow-400 transition">Events</a></li>
             <li><a href="/donate" className="hover:text-yellow-400 transition">Donate</a></li>
             <li><a href="/contact" className="hover:text-yellow-400 transition">Contact</a></li>
           </ul>
@@ -29,11 +28,12 @@ export default function Footer() {
         <div>
           <h3 className="text-2xl font-bold mb-4">Contact</h3>
           <p className="text-gray-200 mb-2 text-sm md:text-base">
-            Email: info@ekpaul.org
+            Email: contact@ekpaulfoundation.org
           </p>
-          <p className="text-gray-200 mb-4 text-sm md:text-base">
+          {/* <p className="text-gray-200 mb-4 text-sm md:text-base">
             Phone: +91 98765 43210
-          </p>
+          </p> */}
+          <br />
           <div className="flex gap-4">
             <a href="#" className="hover:text-yellow-400 transition"><Facebook className="w-6 h-6" /></a>
             <a href="#" className="hover:text-yellow-400 transition"><Instagram className="w-6 h-6" /></a>

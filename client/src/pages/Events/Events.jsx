@@ -1,13 +1,20 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { motion } from "framer-motion";
+import { FiEdit } from "react-icons/fi"; // ← Import pencil icon
 
 export default function Events() {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false); // ✅ Track admin
+  const navigate = useNavigate();
 
   useEffect(() => {
+    // Check if admin token exists
+    const token = localStorage.getItem("token");
+    setIsAdmin(!!token);
+
     const fetchEvents = async () => {
       try {
         const res = await axios.get(`http://localhost:2000/api/events`);
@@ -47,33 +54,47 @@ export default function Events() {
 
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-10 max-w-6xl mx-auto">
         {events.map((event, index) => (
-          <Link to={`/events/${event._id}`} key={event._id} className="block">
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, delay: index * 0.1 }}
-              className="bg-white shadow-lg rounded-2xl overflow-hidden hover:shadow-xl transition-all flex flex-col h-full"
-            >
-              {/* Main media */}
-              <div className="w-full h-56 bg-gray-100 flex items-center justify-center overflow-hidden">
-                {event.images?.length > 0 ? (
-                  <img
-                    src={event.images[0].url}
-                    alt={event.title}
-                    className="w-full h-full object-cover"
-                  />
-                ) : event.videos?.length > 0 ? (
-                  <video
-                    controls
-                    className="w-full h-full object-cover"
-                    src={event.videos[0].url}
-                  />
-                ) : (
-                  <div className="text-gray-400 italic">No media available</div>
-                )}
-              </div>
+          <motion.div
+            key={event._id}
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: index * 0.1 }}
+            className="relative bg-white shadow-lg rounded-2xl overflow-hidden hover:shadow-xl transition-all flex flex-col h-full"
+          >
+            {/* Edit Icon Button (only if admin) */}
+            {isAdmin && (
+              <button
+                onClick={() => navigate(`/admin/manage-events/${event._id}`)}
+                className="absolute top-2 right-2 bg-green-700 text-white p-2 rounded-full z-10 hover:bg-green-800 cursor-pointer"
+              >
+                <FiEdit size={18} />
+              </button>
+            )}
 
-              {/* Event info */}
+            {/* Main media */}
+            <div className="w-full h-56 bg-gray-100 flex items-center justify-center overflow-hidden">
+              {event.images?.length > 0 ? (
+                <img
+                  src={event.images[0].url}
+                  alt={event.title}
+                  className="w-full h-full object-cover"
+                />
+              ) : event.videos?.length > 0 ? (
+                <video
+                  controls
+                  className="w-full h-full object-cover"
+                  src={event.videos[0].url}
+                />
+              ) : (
+                <div className="text-gray-400 italic">No media available</div>
+              )}
+            </div>
+
+            {/* Event info */}
+            <Link
+              to={`/events/${event._id}`}
+              className="flex-grow flex flex-col cursor-pointer"
+            >
               <div className="flex-grow p-6 flex flex-col justify-between text-center">
                 <div>
                   <h3 className="text-xl font-semibold text-green-700 mb-2">
@@ -119,8 +140,8 @@ export default function Events() {
                   ))}
                 </div>
               )}
-            </motion.div>
-          </Link>
+            </Link>
+          </motion.div>
         ))}
       </div>
     </div>

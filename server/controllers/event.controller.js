@@ -8,12 +8,12 @@ export const createEvent = async (req, res) => {
 
     // Map images & videos with { url, public_id }
     const images = req.files?.images?.map(file => ({
-      url: file.path,
+      url: file.path || file.secure_url || file.url,
       public_id: file.filename || file.public_id
     })) || [];
 
     const videos = req.files?.videos?.map(file => ({
-      url: file.path,
+      url: file.path || file.secure_url || file.url,
       public_id: file.filename || file.public_id
     })) || [];
 
@@ -70,25 +70,73 @@ export const getEventById = async (req, res) => {
 // ✅ Update Event
 export const updateEvent = async (req, res) => {
   try {
-    const updatedEvent = await Event.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      { new: true, runValidators: true }
-    );
-
-    if (!updatedEvent)
+    const event = await Event.findById(req.params.id);
+    if (!event) {
       return res.status(404).json({ success: false, message: "Event not found" });
+    }
+
+    // Destructure form fields
+    let { title, description, date, location, removeImages, removeVideos } = req.body;
+
+    // Ensure removeImages/removeVideos are arrays
+    const removeImagesArray = removeImages
+      ? Array.isArray(removeImages) ? removeImages : [removeImages]
+      : [];
+    const removeVideosArray = removeVideos
+      ? Array.isArray(removeVideos) ? removeVideos : [removeVideos]
+      : [];
+
+    // Function to delete media from Cloudinary
+    const deleteFromCloudinary = async (mediaArray, type) => {
+      if (!mediaArray?.length) return;
+      for (const public_id of mediaArray) {
+        if (public_id) {
+          await cloudinary.uploader.destroy(public_id, { resource_type: type });
+        }
+      }
+    };
+
+    // Delete removed media
+    await deleteFromCloudinary(removeImagesArray, "image");
+    await deleteFromCloudinary(removeVideosArray, "video");
+
+    // Filter out removed media from existing arrays
+    const updatedImages = event.images.filter(img => !removeImagesArray.includes(img.public_id));
+    const updatedVideos = event.videos.filter(vid => !removeVideosArray.includes(vid.public_id));
+
+    // Add newly uploaded media
+    const newImages = req.files?.images?.map(file => ({
+      url: file.path || file.secure_url || file.url,
+      public_id: file.filename || file.public_id
+    })) || [];
+
+    const newVideos = req.files?.videos?.map(file => ({
+      url: file.path || file.secure_url || file.url,
+      public_id: file.filename || file.public_id
+    })) || [];
+
+    // Update event fields
+    event.title = title || event.title;
+    event.description = description || event.description;
+    event.date = date || event.date;
+    event.location = location || event.location;
+    event.images = [...updatedImages, ...newImages];
+    event.videos = [...updatedVideos, ...newVideos];
+
+    // Save updated event
+    await event.save();
 
     res.status(200).json({
       success: true,
       message: "Event updated successfully!",
-      data: updatedEvent,
+      data: event,
     });
   } catch (error) {
     console.error("Error updating event:", error);
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
 
 // ✅ Delete Event (with proper Cloudinary cleanup)
 export const deleteEvent = async (req, res) => {
