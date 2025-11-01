@@ -8,6 +8,7 @@ export default function Donation() {
   const [form, setForm] = useState({
     name: "",
     email: "",
+    phone: "",
     amount: "",
     message: "",
   });
@@ -18,11 +19,14 @@ export default function Donation() {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-const handleDonate = async (e) => {
+  const handleDonate = async (e) => {
     e.preventDefault();
 
-    if (Number(form.amount) < 100) {
-      setNotification({ type: "error", message: "⚠️ Minimum donation amount is ₹500." });
+    if (Number(form.amount) < 1) {
+      setNotification({
+        type: "error",
+        message: "⚠️ Minimum donation amount is ₹100.",
+      });
       return;
     }
 
@@ -55,14 +59,26 @@ const handleDonate = async (e) => {
               `${import.meta.env.VITE_API_URL}/api/donations/verify-payment`,
               verifyData
             );
-            setNotification({ type: "success", message: "🎉 Thank you! Your donation was successful." });
-            setForm({ name: "", email: "", amount: "", message: "" });
+            setNotification({
+              type: "success",
+              message: "🎉 Thank you! Your donation was successful.",
+            });
+            setForm({
+              name: "",
+              email: "",
+              phone: "",
+              amount: "",
+              message: "",
+            });
           } catch (err) {
             console.error("Verification failed:", err);
-            setNotification({ type: "error", message: "⚠️ Payment verification failed. Please contact support." });
+            setNotification({
+              type: "error",
+              message: "⚠️ Payment verification failed. Please contact support.",
+            });
           }
         },
-        prefill: { name: form.name, email: form.email },
+        prefill: { name: form.name, email: form.email, contact: form.phone },
         theme: { color: "#16a34a" },
       };
 
@@ -70,7 +86,10 @@ const handleDonate = async (e) => {
       rzp.open();
     } catch (err) {
       console.error(err);
-      setNotification({ type: "error", message: "⚠️ Something went wrong while creating order." });
+      setNotification({
+        type: "error",
+        message: "⚠️ Something went wrong while creating order.",
+      });
     } finally {
       setLoading(false);
     }
@@ -89,13 +108,18 @@ const handleDonate = async (e) => {
           >
             <HeartHandshake className="text-white w-10 h-10" />
           </motion.div>
-          <h2 className="text-4xl font-bold text-green-700">Support Our Cause 💚</h2>
+          <h2 className="text-4xl font-bold text-green-700">
+            Support Our Cause 💚
+          </h2>
           <div className="w-24 h-1 bg-green-400 rounded-full"></div>
           <p className="text-gray-700 text-lg leading-relaxed">
-            Your donation helps provide education, nutrition, and care to children in <strong>Mokhada and Trimbak</strong>. Every contribution, big or small, creates a lasting impact.
+            Your donation helps provide education, nutrition, and care to
+            children in <strong>Mokhada and Trimbak</strong>. Every
+            contribution, big or small, creates a lasting impact.
           </p>
           <p className="text-gray-600">
-            Payments are securely handled via <strong>Razorpay</strong> for instant and safe transactions.
+            Payments are securely handled via{" "}
+            <strong>Razorpay</strong> for instant and safe transactions.
           </p>
           <Link to="/contact">
             <button className="mt-4 bg-green-600 text-white px-6 py-3 rounded-xl font-semibold shadow hover:bg-green-700 transition">
@@ -111,7 +135,7 @@ const handleDonate = async (e) => {
           transition={{ duration: 0.6 }}
           className="bg-white shadow-2xl rounded-3xl p-10 border border-gray-100"
         >
-         <div className="text-center mb-6">
+          <div className="text-center mb-6">
             <h3 className="text-3xl font-extrabold text-green-700">
               Ek Paul Foundation
             </h3>
@@ -120,7 +144,6 @@ const handleDonate = async (e) => {
               Together, we create hope and change lives.
             </p>
           </div>
-
 
           {notification.message && (
             <div
@@ -133,6 +156,7 @@ const handleDonate = async (e) => {
               {notification.message}
             </div>
           )}
+
           <form onSubmit={handleDonate} className="space-y-5">
             <div className="grid md:grid-cols-2 gap-5">
               <div>
@@ -166,6 +190,37 @@ const handleDonate = async (e) => {
             </div>
 
             <div>
+  <label className="text-sm text-gray-700 font-medium mb-1 block">
+    Phone Number
+  </label>
+  <div className="flex">
+    <span className="inline-flex items-center px-3 rounded-l-lg border border-r-0 border-gray-300 bg-gray-100 text-gray-600 text-sm">
+      +91
+    </span>
+    <input
+      type="tel"
+      name="phone"
+      value={form.phone}
+      onChange={(e) => {
+        const value = e.target.value.replace(/\D/g, ""); // remove non-digits
+        if (value.length <= 10) {
+          setForm({ ...form, phone: value });
+        }
+      }}
+      required
+      placeholder="Enter 10-digit number"
+      pattern="\d{10}"
+      maxLength="10"
+      className="w-full border border-gray-300 rounded-r-lg p-3 focus:outline-none focus:ring-2 focus:ring-green-500"
+    />
+  </div>
+  <p className="text-xs text-gray-500 mt-1 text-center">
+    Service available in India only (+91)
+  </p>
+</div>
+
+
+            <div>
               <label className="text-sm text-gray-700 font-medium mb-1 block">
                 Donation Amount (₹)
               </label>
@@ -180,13 +235,14 @@ const handleDonate = async (e) => {
                   onChange={handleChange}
                   required
                   placeholder="Enter amount (min ₹100)"
-                  min="100"
+                  min="1"
                   className="w-full border border-gray-300 rounded-lg p-4 pl-10 text-xl font-bold focus:outline-none focus:ring-2 focus:ring-green-500 text-center bg-green-50 placeholder:text-gray-400"
                 />
               </div>
-              <p className="text-xs text-gray-500 mt-1 text-center">Minimum ₹100 required</p>
+              <p className="text-xs text-gray-500 mt-1 text-center">
+                Minimum ₹100 required
+              </p>
             </div>
-
 
             <div>
               <label className="text-sm text-gray-700 font-medium mb-1 block">
@@ -210,12 +266,15 @@ const handleDonate = async (e) => {
               className="w-full flex items-center justify-center gap-2 bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 transition disabled:opacity-60 shadow-md"
             >
               <CreditCard className="w-5 h-5" />
-              {loading ? "Processing..." : "PAY WITH RAZORPAY (UPI RECOMMENDED)"}
+              {loading
+                ? "Processing..."
+                : "PAY WITH RAZORPAY (UPI RECOMMENDED)"}
             </motion.button>
           </form>
 
           <p className="text-center text-gray-500 text-sm mt-6">
-            100% of your donation goes directly towards our school support programs and nutrition drives.
+            100% of your donation goes directly towards our school support
+            programs and nutrition drives.
           </p>
         </motion.div>
       </div>

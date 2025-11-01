@@ -1,4 +1,5 @@
 import { Resend } from "resend";
+import fs from "fs";
 
 export const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -9,14 +10,25 @@ export const resend = new Resend(process.env.RESEND_API_KEY);
  * @param {string|string[]} mailOptions.to
  * @param {string} mailOptions.subject
  * @param {string} mailOptions.html
+ * @param {Array} [mailOptions.attachments] - Optional attachments (e.g., PDFs)
  */
-export async function sendEmail({ from, to, subject, html }) {
+export async function sendEmail({ from, to, subject, html, attachments = [] }) {
   try {
+    const formattedAttachments = attachments.map((file) => {
+      const fileContent = fs.readFileSync(file.path).toString("base64");
+      return {
+        filename: file.filename,
+        content: fileContent,
+        type: file.contentType || "application/pdf",
+      };
+    });
+
     const { data, error } = await resend.emails.send({
       from,
       to,
       subject,
       html,
+      attachments: formattedAttachments.length > 0 ? formattedAttachments : undefined,
     });
 
     if (error) {
@@ -24,7 +36,6 @@ export async function sendEmail({ from, to, subject, html }) {
       throw new Error(error.message);
     }
 
-    console.log("✅ Email sent successfully:", data.id);
     return data;
   } catch (err) {
     console.error("❌ Failed to send email via Resend:", err.message);
