@@ -8,6 +8,10 @@ export const createOrder = async (req, res) =>{
     try {
         const { amount, name, email, message } = req.body;
 
+        if(!amount || !name || !email){
+            return res.status(400).json({message: "All fields are required"});
+        }
+
         const MIN_AMOUNT = 100;
         const MAX_AMOUNT = 500000;
 
