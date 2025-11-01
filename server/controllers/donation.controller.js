@@ -8,7 +8,7 @@ export const createOrder = async (req, res) =>{
     try {
         const { amount, name, email, message } = req.body;
 
-        const MIN_AMOUNT = 1;
+        const MIN_AMOUNT = 100;
         const MAX_AMOUNT = 500000;
 
         if(amount < MIN_AMOUNT || amount > MAX_AMOUNT){
