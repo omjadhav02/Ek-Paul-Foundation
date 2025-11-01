@@ -18,10 +18,10 @@ export default function Donation() {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleDonate = async (e) => {
+const handleDonate = async (e) => {
     e.preventDefault();
 
-    if (Number(form.amount) < 500) {
+    if (Number(form.amount) < 1) {
       setNotification({ type: "error", message: "⚠️ Minimum donation amount is ₹500." });
       return;
     }
@@ -111,9 +111,17 @@ export default function Donation() {
           transition={{ duration: 0.6 }}
           className="bg-white shadow-2xl rounded-3xl p-10 border border-gray-100"
         >
-          <h3 className="text-2xl font-bold text-green-700 mb-4 text-center">
-            Donate Now
-          </h3>
+         <div className="text-center mb-6">
+            <h3 className="text-3xl font-extrabold text-green-700">
+              Ek Paul Foundation
+            </h3>
+            <div className="w-20 h-1 bg-green-600 mx-auto my-2 rounded-full"></div>
+            <p className="text-gray-600 text-sm">
+              Together, we create hope and change lives.
+            </p>
+          </div>
+
+
           {notification.message && (
             <div
               className={`mb-5 px-4 py-3 rounded-lg text-center ${
@@ -158,26 +166,26 @@ export default function Donation() {
             </div>
 
             <div>
-  <label className="text-sm text-gray-700 font-medium mb-1 block">
-    Donation Amount (₹)
-  </label>
-  <div className="relative">
-    <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 font-medium">
-      ₹
-    </span>
-    <input
-      type="number"
-      name="amount"
-      value={form.amount}
-      onChange={handleChange}
-      required
-      placeholder="Enter amount (min ₹500)"
-      min="500"
-      className="w-full border border-gray-300 rounded-lg p-4 pl-10 text-xl font-bold focus:outline-none focus:ring-2 focus:ring-green-500 text-center bg-green-50 placeholder:text-gray-400"
-    />
-  </div>
-  <p className="text-xs text-gray-500 mt-1 text-center">Minimum ₹500 required</p>
-</div>
+              <label className="text-sm text-gray-700 font-medium mb-1 block">
+                Donation Amount (₹)
+              </label>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 font-medium">
+                  ₹
+                </span>
+                <input
+                  type="number"
+                  name="amount"
+                  value={form.amount}
+                  onChange={handleChange}
+                  required
+                  placeholder="Enter amount (min ₹500)"
+                  min="1"
+                  className="w-full border border-gray-300 rounded-lg p-4 pl-10 text-xl font-bold focus:outline-none focus:ring-2 focus:ring-green-500 text-center bg-green-50 placeholder:text-gray-400"
+                />
+              </div>
+              <p className="text-xs text-gray-500 mt-1 text-center">Minimum ₹500 required</p>
+            </div>
 
 
             <div>
@@ -202,7 +210,7 @@ export default function Donation() {
               className="w-full flex items-center justify-center gap-2 bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 transition disabled:opacity-60 shadow-md"
             >
               <CreditCard className="w-5 h-5" />
-              {loading ? "Processing..." : "Donate Now"}
+              {loading ? "Processing..." : "PAY WITH RAZORPAY (UPI RECOMMENDED)"}
             </motion.button>
           </form>
 

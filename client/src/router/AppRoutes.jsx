@@ -20,6 +20,8 @@ import ManageEvents from "../pages/Admin/ManageEvents";
 import ManageVisits from "../pages/Admin/ManageVisits";
 import ManageDonations from "../pages/Admin/ManageDonations";
 import AddVisit from "../pages/Admin/AddVisit";
+import TermsAndConditions from "../pages/Legal/TermsAndConditions";
+import PrivacyPolicy from "../pages/Legal/PrivacyPolicy";
 
 export default function AppRoutes() {
   return (
@@ -32,6 +34,8 @@ export default function AppRoutes() {
         <Route path="/donate" element={<Donation />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/our-impact" element={<OurImpact />} />
+        <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
+        <Route path="/privacy-policy" element={<PrivacyPolicy />} />
         
         {/* <Route path="/events" element={<Events />} /> */}
         

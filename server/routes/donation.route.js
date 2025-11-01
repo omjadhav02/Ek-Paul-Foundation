@@ -8,7 +8,7 @@ const router = express.Router();
 router.post("/create-order", createOrder);
 router.post("/verify-payment", verifyPayment);
 
-router.get("/list",getAllDonations);
+router.get("/list",protectAdmin,getAllDonations);
 router.get("/:id",protectAdmin,getDonationByID);
 router.put("/:id",protectAdmin,updateDonation);
 router.delete("/:id",protectAdmin, deleteDonation);

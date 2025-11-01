@@ -27,16 +27,24 @@ export const donationSuccessTemplate = (name, amount, date, transactionId) => `<
     </table>
   </div>
 
-  <div style="text-align: center; margin-top: 25px;">
-    <a 
-      href="#" 
-      style="display: inline-block; background-color: #2e8b57; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-size: 15px; font-weight: 500;">
-      📄 Your PDF Receipt is attached
-    </a>
-  </div>
+  
 
   <p style="font-size: 14px; color: #555; text-align: center; margin-top: 25px;">
     Your contribution helps us continue our mission to bring positive change. Every step counts, and you just took a big one! 🌱
+  </p>
+
+  <div style="text-align:center;margin:30px 0;">
+      <a href="https://ekpaulfoundation.org"
+            style="background:#007bff;color:#fff;padding:12px 28px;border-radius:25px;
+                  text-decoration:none;font-weight:600;font-size:15px;display:inline-block;">
+          Visit Our Website
+      </a>
+  </div>
+
+  <p style="margin-top:25px;color:#555;font-size:15px;">
+      With gratitude,<br/>
+      <strong>Ek Paul Foundation Team</strong><br/>
+      <a href="mailto:contact@ekpaulfoundation.org" style="color:#007bff;text-decoration:none;">contact@ekpaulfoundation.org</a>
   </p>
 
   <hr style="border:none; border-top:1px solid #ddd; margin:25px 0;" />

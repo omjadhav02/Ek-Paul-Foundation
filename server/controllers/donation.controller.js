@@ -2,15 +2,13 @@ import razorpay from "../config/razorpay.js";
 import Donation from "../models/donation.model.js";
 import crypto from "crypto";
 import { donationSuccessTemplate } from "../utils/email-templates/donationSuccess.js";
-import { sendEmail2 } from "../utils/sendEmail2.js";
-import { generateDonationReceipt } from "../utils/generateDonationReceipt.js";
-import fs from "fs";
+import { sendEmail } from "../utils/resend-email/resendEmail.js";
 
 export const createOrder = async (req, res) =>{
     try {
         const { amount, name, email, message } = req.body;
 
-        const MIN_AMOUNT = 500;
+        const MIN_AMOUNT = 1;
         const MAX_AMOUNT = 500000;
 
         if(amount < MIN_AMOUNT || amount > MAX_AMOUNT){
@@ -42,7 +40,7 @@ export const createOrder = async (req, res) =>{
             donationId: donation._id,
         });
     } catch (error) {
-        console.error("Error creating Razorpay order c:", error);
+        console.error("Error creating Razorpay order :", error);
         res.status(500).json({ message: error.message });
     }
 }
@@ -75,15 +73,6 @@ export const verifyPayment = async (req, res) => {
       return res.status(404).json({ message: "Donation not found" });
     }
 
-    // Generate PDF receipt
-    const pdfBuffer = await generateDonationReceipt(donation);
-    const pdfPath = `./tmp/DonationReceipt_${donation.transactionId}.pdf`;
-
-    // Ensure tmp folder exists
-    if (!fs.existsSync("./tmp")) fs.mkdirSync("./tmp");
-
-    fs.writeFileSync(pdfPath, pdfBuffer);
-
     // Create the HTML email content
     const html = donationSuccessTemplate(
       donation.name,
@@ -93,20 +82,15 @@ export const verifyPayment = async (req, res) => {
     );
 
     // Send email with PDF attachment
-    await sendEmail2(
-      donation.email,
-      "Your Donation Receipt - Ek Paul Foundation",
+    await sendEmail({
+      from: process.env.FOUNDATION_EMAIL,
+      to: donation.email,
+      subject: "Your Donation - Ek Paul Foundation",
       html,
-      pdfPath
-    );
-
-    // Optional: delete PDF file after 5 mins
-    setTimeout(() => {
-      if (fs.existsSync(pdfPath)) fs.unlinkSync(pdfPath);
-    }, 1000 * 60 * 5);
+    });
 
     return res.status(200).json({
-      message: "Payment verified & receipt emailed successfully",
+      message: "Payment verified & emailed successfully",
       donation,
     });
   } catch (error) {
@@ -114,9 +98,6 @@ export const verifyPayment = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
-
-
-
 
 
 export const getAllDonations = async (req, res) => {
