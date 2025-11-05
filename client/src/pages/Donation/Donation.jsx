@@ -22,7 +22,7 @@ export default function Donation() {
   const handleDonate = async (e) => {
     e.preventDefault();
 
-    if (Number(form.amount) < 1) {
+    if (Number(form.amount) < 100) {
       setNotification({
         type: "error",
         message: "⚠️ Minimum donation amount is ₹100.",
@@ -235,7 +235,7 @@ export default function Donation() {
                   onChange={handleChange}
                   required
                   placeholder="Enter amount (min ₹100)"
-                  min="1"
+                  min="100"
                   className="w-full border border-gray-300 rounded-lg p-4 pl-10 text-xl font-bold focus:outline-none focus:ring-2 focus:ring-green-500 text-center bg-green-50 placeholder:text-gray-400"
                 />
               </div>
