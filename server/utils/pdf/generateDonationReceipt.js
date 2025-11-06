@@ -70,6 +70,7 @@ export const generateDonationReceipt = async (donation) => {
       new Date(createdAt).toLocaleString("en-IN", {
         dateStyle: "medium",
         timeStyle: "short",
+        timeZone: "Asia/Kolkata",
       }),
     ],
   ];
