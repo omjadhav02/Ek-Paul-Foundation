@@ -8,9 +8,12 @@ export default function About() {
     "Manish Jadhav",
     "Rohit Gaikwad",
     "Ganesh Gajjewar",
+    "Sangeeta Bhise",
+    "Sonali Amberkar",
     "Hanumant Ghule",
-    "Raees Shah",
     "Jagannath Jadhav",
+    "Raees Shah",
+    "Om Jadhav",
   ];
 
   const heroImages = [

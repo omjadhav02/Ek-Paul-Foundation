@@ -1,4 +1,5 @@
 import { Facebook, Instagram, Mail } from "lucide-react";
+import { Link } from "react-router-dom";
 
 export default function Footer() {
   return (
@@ -39,7 +40,7 @@ export default function Footer() {
           <div className="flex gap-4">
             <a href="#" className="hover:text-yellow-400 transition"><Facebook className="w-6 h-6" /></a>
             <a href="#" className="hover:text-yellow-400 transition"><Instagram className="w-6 h-6" /></a>
-            <a href="#" className="hover:text-yellow-400 transition"><Mail className="w-6 h-6" /></a>
+            <Link to={"/contact"} className="hover:text-yellow-400 transition"><Mail className="w-6 h-6" /></Link>
           </div>
         </div>
       </div>

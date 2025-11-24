@@ -188,38 +188,35 @@ export default function Donation() {
                 />
               </div>
             </div>
-
             <div>
-  <label className="text-sm text-gray-700 font-medium mb-1 block">
-    Phone Number
-  </label>
-  <div className="flex">
-    <span className="inline-flex items-center px-3 rounded-l-lg border border-r-0 border-gray-300 bg-gray-100 text-gray-600 text-sm">
-      +91
-    </span>
-    <input
-      type="tel"
-      name="phone"
-      value={form.phone}
-      onChange={(e) => {
-        const value = e.target.value.replace(/\D/g, ""); // remove non-digits
-        if (value.length <= 10) {
-          setForm({ ...form, phone: value });
-        }
-      }}
-      required
-      placeholder="Enter 10-digit number"
-      pattern="\d{10}"
-      maxLength="10"
-      className="w-full border border-gray-300 rounded-r-lg p-3 focus:outline-none focus:ring-2 focus:ring-green-500"
-    />
-  </div>
-  <p className="text-xs text-gray-500 mt-1 text-center">
-    Service available in India only (+91)
-  </p>
-</div>
-
-
+              <label className="text-sm text-gray-700 font-medium mb-1 block">
+                Phone Number
+              </label>
+              <div className="flex">
+                <span className="inline-flex items-center px-3 rounded-l-lg border border-r-0 border-gray-300 bg-gray-100 text-gray-600 text-sm">
+                  +91
+                </span>
+                <input
+                  type="tel"
+                  name="phone"
+                  value={form.phone}
+                  onChange={(e) => {
+                    const value = e.target.value.replace(/\D/g, ""); // remove non-digits
+                    if (value.length <= 10) {
+                      setForm({ ...form, phone: value });
+                    }
+                  }}
+                  required
+                  placeholder="Enter 10-digit number"
+                  pattern="\d{10}"
+                  maxLength="10"
+                  className="w-full border border-gray-300 rounded-r-lg p-3 focus:outline-none focus:ring-2 focus:ring-green-500"
+                />
+              </div>
+              <p className="text-xs text-gray-500 mt-1 text-center">
+                Service available in India only (+91)
+              </p>
+            </div>
             <div>
               <label className="text-sm text-gray-700 font-medium mb-1 block">
                 Donation Amount (₹)
