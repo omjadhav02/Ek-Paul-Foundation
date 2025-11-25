@@ -38,8 +38,8 @@ export default function Footer() {
           </p> */}
           <br />
           <div className="flex gap-4">
-            <a href="#" className="hover:text-yellow-400 transition"><Facebook className="w-6 h-6" /></a>
-            <a href="#" className="hover:text-yellow-400 transition"><Instagram className="w-6 h-6" /></a>
+            {/* <a href="#" className="hover:text-yellow-400 transition"><Facebook className="w-6 h-6" /></a> */}
+            <a href="https://instagram.com/ekpaulfoundation" className="hover:text-yellow-400 transition"><Instagram className="w-6 h-6" /></a>
             <Link to={"/contact"} className="hover:text-yellow-400 transition"><Mail className="w-6 h-6" /></Link>
           </div>
         </div>

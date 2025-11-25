@@ -124,7 +124,8 @@ export const generateDonationReceipt = async (donation) => {
     .text("Team Ek Paul Foundation", 70, footerY + 25)
     .fillColor(primaryColor)
     .text("Contact: contact@ekpaulfoundation.org", 70, footerY + 45)
-    .text("Visit: https://www.ekpaulfoundation.org", 70, footerY + 60)
+    .text("Visit: https://www.ekpaulfoundation.org", 70, footerY + 55)
+    .text("Follow on: https://instagram.com/ekpaulfoundation", 70, footerY + 65)
     .fillColor("#000")
     .text("© 2025 Ek Paul Foundation. All Rights Reserved.", 70, footerY + 80, {
       align: "center",
