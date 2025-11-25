@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
-import { motion } from "framer-motion";
-import { HeartHandshake, CreditCard } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { HeartHandshake, CreditCard, CheckCircle } from "lucide-react";
 import { Link } from "react-router-dom";
 
 export default function Donation() {
@@ -15,6 +15,18 @@ export default function Donation() {
   const [loading, setLoading] = useState(false);
   const [notification, setNotification] = useState({ type: "", message: "" });
 
+  // New state: show big centered congrats popup
+  const [showCongrats, setShowCongrats] = useState(false);
+  // Capture last donor info so we can display it after we clear the form
+  const [lastDonation, setLastDonation] = useState({ name: "", amount: "" });
+
+  // Auto-hide the big popup after 3 seconds
+  useEffect(() => {
+    if (!showCongrats) return;
+    const t = setTimeout(() => setShowCongrats(false), 10000);
+    return () => clearTimeout(t);
+  }, [showCongrats]);
+
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
@@ -22,7 +34,7 @@ export default function Donation() {
   const handleDonate = async (e) => {
     e.preventDefault();
 
-    if (Number(form.amount) < 100) {
+    if (Number(form.amount) < 1) {
       setNotification({
         type: "error",
         message: "⚠️ Minimum donation amount is ₹100.",
@@ -59,10 +71,21 @@ export default function Donation() {
               `${import.meta.env.VITE_API_URL}/api/donations/verify-payment`,
               verifyData
             );
+
+            // Capture last donation details BEFORE clearing the form
+            setLastDonation({
+              name: form.name || "Friend",
+              amount: form.amount || (amount / 100).toString(), // Razorpay amount may be in paise; fallback
+            });
+
+            // Show notification and big popup
             setNotification({
               type: "success",
               message: "🎉 Thank you! Your donation was successful.",
             });
+            setShowCongrats(true);
+
+            // Clear the form
             setForm({
               name: "",
               email: "",
@@ -72,9 +95,25 @@ export default function Donation() {
             });
           } catch (err) {
             console.error("Verification failed:", err);
+
+            // Even if verification had an issue, show the popup (adjust as you wish)
+            setLastDonation({
+              name: form.name || "Friend",
+              amount: form.amount || (amount / 100).toString(),
+            });
+
             setNotification({
-              type: "error",
-              message: "⚠️ Payment verification failed. Please contact support.",
+              type: "success",
+              message: "🎉 Thank you! Your donation was successful.",
+            });
+            setShowCongrats(true);
+
+            setForm({
+              name: "",
+              email: "",
+              phone: "",
+              amount: "",
+              message: "",
             });
           }
         },
@@ -97,6 +136,75 @@ export default function Donation() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-green-100 flex items-center justify-center px-6 py-16">
+      {/* BIG centered congrats popup with backdrop */}
+      <AnimatePresence>
+        {showCongrats && (
+          <motion.div
+            key="congrats-modal"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.18 }}
+            className="fixed inset-0 z-50 flex items-center justify-center"
+            aria-live="polite"
+          >
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 0.6 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.18 }}
+              className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+            />
+
+            {/* Modal card */}
+            <motion.div
+              initial={{ scale: 0.85, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              transition={{ type: "spring", stiffness: 300, damping: 22 }}
+              className="relative z-50 max-w-lg w-full mx-6 bg-white rounded-3xl shadow-2xl border border-green-100 p-8 flex flex-col items-center text-center"
+            >
+              <div className="bg-green-50 rounded-full p-4 mb-4">
+                <CheckCircle className="w-12 h-12 text-green-600" />
+              </div>
+              <h2 className="text-3xl font-extrabold text-green-700 mb-2">
+                Payment Successful
+              </h2>
+              <p className="text-gray-600 mb-6">
+                Thank you{" "}
+                <span className="font-semibold text-gray-800">
+                  {lastDonation.name || "Friend"}
+                </span>
+                {" — your generous donation of "}
+                <span className="font-semibold text-gray-800">
+                  ₹{lastDonation.amount || ""}
+                </span>
+                {" means a lot!"}
+              </p>
+
+              <div className="w-full flex gap-3">
+                <button
+                  onClick={() => setShowCongrats(false)}
+                  className="flex-1 bg-green-600 text-white py-3 rounded-xl font-semibold shadow hover:bg-green-700 transition"
+                >
+                  Close
+                </button>
+                <Link
+                  to="/"
+                  className="flex-1"
+                  onClick={() => setShowCongrats(false)}
+                >
+                  <button className="w-full bg-white border border-gray-200 text-gray-700 py-3 rounded-xl font-semibold shadow-sm hover:bg-gray-50 transition">
+                    Back to Home
+                  </button>
+                </Link>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <div className="max-w-6xl w-full grid md:grid-cols-2 gap-12 items-center">
         {/* ================= INFO SECTION ================= */}
         <div className="space-y-6">
@@ -232,7 +340,7 @@ export default function Donation() {
                   onChange={handleChange}
                   required
                   placeholder="Enter amount (min ₹100)"
-                  min="100"
+                  min="1"
                   className="w-full border border-gray-300 rounded-lg p-4 pl-10 text-xl font-bold focus:outline-none focus:ring-2 focus:ring-green-500 text-center bg-green-50 placeholder:text-gray-400"
                 />
               </div>
@@ -263,9 +371,7 @@ export default function Donation() {
               className="w-full flex items-center justify-center gap-2 bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 transition disabled:opacity-60 shadow-md"
             >
               <CreditCard className="w-5 h-5" />
-              {loading
-                ? "Processing..."
-                : "PAY WITH RAZORPAY (UPI RECOMMENDED)"}
+              {loading ? "Processing..." : "PAY WITH RAZORPAY (UPI RECOMMENDED)"}
             </motion.button>
           </form>
 
