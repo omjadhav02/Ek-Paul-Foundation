@@ -11,15 +11,20 @@ import visitRoutes from "./routes/visit.route.js";
 import volunteerRoutes from "./routes/volunteer.route.js"
 import contactRoutes from "./routes/contact.route.js"
 
-
-
-
 dotenv.config();
 
 const app = express();
 app.use(express.json());
 app.use(cookieParser());
-app.use(cors());
+
+const allowOrigins = [
+    process.env.FRONTEND_URL,
+    process.env.BACKEND_URL
+]
+app.use(cors({
+    origin: allowOrigins,
+    credentials: true,
+}));
 
 const PORT = process.env.PORT || 2000;
 
